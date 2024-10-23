@@ -2,7 +2,6 @@
 using Azure.Identity;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 
@@ -12,7 +11,6 @@ namespace Ad_Poc.Controllers;
 [Route("/postgresql")]
 public class PostgreSqlController :ControllerBase
 {
-
     private readonly string _connectionString;
     private readonly string _entraIdUser;
     public PostgreSqlController(IConfiguration configuration)
@@ -28,8 +26,8 @@ public class PostgreSqlController :ControllerBase
         try
         {
             NpgsqlConnectionStringBuilder connectionStringBuilder = new(_connectionString);
-            var token = await GetPgSqlToken();
-            connectionStringBuilder.Username = "";
+            var token = await GetEntraIdPassword();
+            connectionStringBuilder.Username = _entraIdUser;
             connectionStringBuilder.Password = token;
 
             await using var conn = new NpgsqlConnection(connectionStringBuilder.ToString());
@@ -45,7 +43,7 @@ public class PostgreSqlController :ControllerBase
     }
 
 
-    private static async Task<string> GetPgSqlToken()
+    private static async Task<string> GetEntraIdPassword()
     {
         try
         {
@@ -57,8 +55,7 @@ public class PostgreSqlController :ControllerBase
         }
         catch (Exception e)
         {
-            Console.Out.WriteLine("{0} \n\n{1}", e.Message,
-                e.InnerException != null ? e.InnerException.Message : "Acquire token failed");
+            Console.Out.WriteLine("{0} \n\n{1}", e.Message, e.InnerException != null ? e.InnerException.Message : "Acquire token failed");
             throw;
         }
     }
