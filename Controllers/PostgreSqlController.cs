@@ -2,46 +2,34 @@
 using Azure.Identity;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using Npgsql;
 
 namespace Ad_Poc.Controllers;
 
 [ApiController]
-[Route("/")]
-public class Home(IConfiguration configuration) : ControllerBase
+[Route("/postgresql")]
+public class PostgreSqlController :ControllerBase
 {
-    private readonly string _connectionString = configuration.GetConnectionString("database")!;
-    private readonly string _pgConnectionString = configuration.GetConnectionString("pg-database");
 
-    [HttpGet("sqlserver")]
-    [AllowAnonymous]
-    public async Task<IActionResult> SqlServer()
+    private readonly string _connectionString;
+    private readonly string _entraIdUser;
+    public PostgreSqlController(IConfiguration configuration)
     {
-        try
-        {
-            await using var dbConnection = new SqlConnection(_connectionString);
-            const string sql =
-                "SELECT TOP (10) [CustomerID], [FirstName], [LastName], [CompanyName]  FROM [SalesLT].[Customer]";
-            var users = await dbConnection.QueryAsync<User>(sql);
-            return Ok(users);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(new { message = e.Message, StackTrack = e.StackTrace });
-        }
+        _connectionString = configuration.GetConnectionString("pg-database")!;
+        _entraIdUser = configuration["entraIdUser"]!;
     }
-
+    
     [HttpGet("pgsql")]
     [AllowAnonymous]
     public async Task<IActionResult> PostgreSql()
     {
         try
         {
-            NpgsqlConnectionStringBuilder connectionStringBuilder = new(_pgConnectionString);
+            NpgsqlConnectionStringBuilder connectionStringBuilder = new(_connectionString);
             var token = await GetPgSqlToken();
-            connectionStringBuilder.Username = "cristiano.cunha@akadseguros.com.br";
+            connectionStringBuilder.Username = "";
             connectionStringBuilder.Password = token;
 
             await using var conn = new NpgsqlConnection(connectionStringBuilder.ToString());
