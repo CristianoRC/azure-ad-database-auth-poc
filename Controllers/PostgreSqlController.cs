@@ -9,16 +9,12 @@ namespace Ad_Poc.Controllers;
 
 [ApiController]
 [Route("/postgresql")]
-public class PostgreSqlController :ControllerBase
+public class PostgreSqlController(IConfiguration configuration) : ControllerBase
 {
-    private readonly string _connectionString;
-    private readonly string _entraIdUser;
-    public PostgreSqlController(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("pg-database")!;
-        _entraIdUser = configuration["entraIdUser"]!;
-    }
-    
+    private readonly string _connectionString = configuration["postgre:database"]!;
+    private readonly string _entraIdUser = configuration["postgre:entraIdUser"]!;
+    private readonly string _azurePostgreTokenScope = configuration["postgre:tokenScope"]!;
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> PostgreSql()
@@ -26,7 +22,7 @@ public class PostgreSqlController :ControllerBase
         try
         {
             NpgsqlConnectionStringBuilder connectionStringBuilder = new(_connectionString);
-            var token = await GetEntraIdPassword();
+            var token = await GetEntraIdToken();
             connectionStringBuilder.Username = _entraIdUser;
             connectionStringBuilder.Password = token;
 
@@ -42,21 +38,20 @@ public class PostgreSqlController :ControllerBase
             return BadRequest(new { message = e.Message, StackTrack = e.StackTrace });
         }
     }
-
-
-    private static async Task<string> GetEntraIdPassword()
+    
+    private async Task<string> GetEntraIdToken()
     {
         try
         {
-            //TODO: Refatorar e dar bons nomes
-            var credential = new DefaultAzureCredential();
-            var context = new TokenRequestContext(["https://ossrdbms-aad.database.windows.net/.default"]);
-            var tokenResponse = await credential.GetTokenAsync(context);
+            var azureCredential = new DefaultAzureCredential();
+            var tokenScope = new TokenRequestContext([_azurePostgreTokenScope]);
+            var tokenResponse = await azureCredential.GetTokenAsync(tokenScope);
             return tokenResponse.Token;
         }
-        catch (Exception e)
+        catch (Exception error)
         {
-            Console.Out.WriteLine("{0} \n\n{1}", e.Message, e.InnerException != null ? e.InnerException.Message : "Acquire token failed");
+            var errorMessage = error.InnerException != null ? error.InnerException.Message : "Failed to obtain token";
+            await Console.Out.WriteLineAsync($"{error.Message}\n\n{errorMessage}");
             throw;
         }
     }

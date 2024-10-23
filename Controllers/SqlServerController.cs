@@ -7,15 +7,10 @@ namespace Ad_Poc.Controllers;
 
 [ApiController]
 [Route("/sqlserver")]
-public class SqlServerController : ControllerBase
+public class SqlServerController(IConfiguration configuration) : ControllerBase
 {
-    private readonly string _connectionString;
+    private readonly string _connectionString = configuration.GetConnectionString("database")!;
 
-    public SqlServerController(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("database")!;
-    }
-    
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> SqlServer()
