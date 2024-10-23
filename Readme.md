@@ -1,6 +1,6 @@
-# POC: Conexão com Bancos de Dados usando Entra ID / Azure AD (Active Directory)
+# SQL - Autenticação com Entra ID
 
-## Visão Geral
+## Descrição
 
 Este projeto é uma Prova de Conceito (PoC) que demonstra como estabelecer conexões seguras com bancos de dados SQL Server e PostgreSQL utilizando autenticação do Entra ID (anteriormente conhecido como Azure AD) em uma aplicação C#.
 
