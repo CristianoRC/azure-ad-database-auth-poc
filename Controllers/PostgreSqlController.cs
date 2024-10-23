@@ -19,7 +19,7 @@ public class PostgreSqlController :ControllerBase
         _entraIdUser = configuration["entraIdUser"]!;
     }
     
-    [HttpGet("pgsql")]
+    [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> PostgreSql()
     {
@@ -32,7 +32,8 @@ public class PostgreSqlController :ControllerBase
 
             await using var conn = new NpgsqlConnection(connectionStringBuilder.ToString());
             await conn.OpenAsync();
-            var response = await conn.QueryAsync<dynamic>("");
+            const string query = "SELECT schemaname, tablename FROM pg_catalog.pg_tables LIMIT 5;";
+            var response = await conn.QueryAsync<dynamic>(query);
             await conn.CloseAsync();
             return Ok(response);
         }
