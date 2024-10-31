@@ -15,11 +15,15 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         //--------- Configuração do EntraId / Ad no PostgreSQL
-        
         var connectionString = builder.Configuration["postgre:database"]!;
+        var entraIdUser = builder.Configuration["postgre:entraIdUser"]!;
         var azurePostgreTokenScope = builder.Configuration["postgre:tokenScope"]!;
+        var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            Username = entraIdUser
+        };
 
-        builder.Services.AddNpgsqlDataSource(connectionString, dataSourceBuilder =>
+        builder.Services.AddNpgsqlDataSource(connectionStringBuilder.ToString(), dataSourceBuilder =>
         {
             dataSourceBuilder.UsePeriodicPasswordProvider(async (_, cancellationToken) =>
             {
