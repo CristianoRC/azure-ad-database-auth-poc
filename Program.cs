@@ -6,7 +6,7 @@ namespace Ad_Poc;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -15,13 +15,13 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         //--------- Configuração do EntraId / Ad no PostgreSQL
+
         var connectionString = builder.Configuration["postgre:database"]!;
-        var entraIdLocalUser = builder.Configuration["postgre:entraIdUser"];
-        var azureServiceName = builder.Configuration["WEBSITE_SITE_NAME"];
         var azurePostgreTokenScope = builder.Configuration["postgre:tokenScope"]!;
+        var postgreUserName = await PostgreUserService.GetPostgreSQLAuthUserName(builder.Configuration);
         var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
         {
-            Username = entraIdLocalUser ?? azureServiceName
+            Username = postgreUserName
         };
 
         builder.Services.AddNpgsqlDataSource(connectionStringBuilder.ToString(), dataSourceBuilder =>
@@ -34,7 +34,6 @@ public class Program
                 return tokenResponse.Token;
             }, TimeSpan.FromHours(3), TimeSpan.FromSeconds(5));
         });
-        
         //--------- Fim da Configuração do PostgreSQL
 
         var app = builder.Build();
