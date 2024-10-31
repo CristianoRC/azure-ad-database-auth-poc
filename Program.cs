@@ -16,11 +16,12 @@ public class Program
 
         //--------- Configuração do EntraId / Ad no PostgreSQL
         var connectionString = builder.Configuration["postgre:database"]!;
-        var entraIdUser = builder.Configuration["postgre:entraIdUser"]!;
+        var entraIdLocalUser = builder.Configuration["postgre:entraIdUser"];
+        var azureServiceName = builder.Configuration["WEBSITE_SITE_NAME"];
         var azurePostgreTokenScope = builder.Configuration["postgre:tokenScope"]!;
         var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
         {
-            Username = entraIdUser
+            Username = entraIdLocalUser ?? azureServiceName
         };
 
         builder.Services.AddNpgsqlDataSource(connectionStringBuilder.ToString(), dataSourceBuilder =>
