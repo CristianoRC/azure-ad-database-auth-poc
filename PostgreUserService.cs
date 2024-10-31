@@ -8,13 +8,17 @@ public static class PostgreUserService
 {
     public static async Task<string> GetPostgreSqlAuthUserName(IConfiguration config)
     {
-        var azureAppName = config["WEBSITE_SITE_NAME"];
+        var azureAppName = GetAzureAppName(config);
         if (string.IsNullOrEmpty(azureAppName) is false)
             return azureAppName;
-
         return await GetLocalUserName();
     }
 
+    private static string? GetAzureAppName(IConfiguration config)
+    {
+        return config["WEBSITE_SITE_NAME"];
+    }
+    
     private static async Task<string> GetLocalUserName()
     {
         try
