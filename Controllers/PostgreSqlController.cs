@@ -12,7 +12,6 @@ namespace Ad_Poc.Controllers;
 public class PostgreSqlController(IConfiguration configuration) : ControllerBase
 {
     private readonly string _connectionString = configuration["postgre:database"]!;
-    private readonly string _entraIdUser = configuration["postgre:entraIdUser"]!;
     private readonly string _azurePostgreTokenScope = configuration["postgre:tokenScope"]!;
 
     [HttpGet]
@@ -23,7 +22,6 @@ public class PostgreSqlController(IConfiguration configuration) : ControllerBase
         {
             NpgsqlConnectionStringBuilder connectionStringBuilder = new(_connectionString);
             var token = await GetEntraIdToken();
-            connectionStringBuilder.Username = _entraIdUser;
             connectionStringBuilder.Password = token;
 
             await using var conn = new NpgsqlConnection(connectionStringBuilder.ToString());
