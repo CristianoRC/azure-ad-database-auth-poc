@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Azure.Core;
+﻿using Azure.Core;
 using Azure.Identity;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +22,7 @@ public class PostgreSqlController(IConfiguration configuration) : ControllerBase
         {
             NpgsqlConnectionStringBuilder connectionStringBuilder = new(_connectionString);
             var token = await GetEntraIdToken();
-            connectionStringBuilder.Username = await PostgreUserService.GetPostgreSQLAuthUserName(configuration);
+            connectionStringBuilder.Username = await PostgreUserService.GetPostgreSqlAuthUserName(configuration);
             connectionStringBuilder.Password = token;
 
             await using var conn = new NpgsqlConnection(connectionStringBuilder.ToString());

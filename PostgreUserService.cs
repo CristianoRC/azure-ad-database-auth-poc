@@ -6,7 +6,7 @@ namespace Ad_Poc;
 
 public static class PostgreUserService
 {
-    public static async Task<string> GetPostgreSQLAuthUserName(IConfiguration config)
+    public static async Task<string> GetPostgreSqlAuthUserName(IConfiguration config)
     {
         var azureAppName = config["WEBSITE_SITE_NAME"];
         if (string.IsNullOrEmpty(azureAppName) is false)
@@ -17,12 +17,21 @@ public static class PostgreUserService
 
     private static async Task<string> GetLocalUserName()
     {
-        var credential = new AzureCliCredential();
-        var token = await credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]));
+        try
+        {
+            var credential = new AzureCliCredential();
+            var token = await credential.GetTokenAsync(new TokenRequestContext(["https://management.azure.com/.default"]));
 
-        var handler = new JwtSecurityTokenHandler();
-        var jsonToken = handler.ReadToken(token.Token) as JwtSecurityToken;
-        var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "upn")?.Value;
-        return email;
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token.Token) as JwtSecurityToken;
+            var email = jsonToken.Claims.FirstOrDefault(claim => claim.Type == "upn")?.Value;
+            return email;
+        }
+        catch (Exception e)
+        {
+            await Console.Error.WriteLineAsync("Erro ao obter usuário local, não esqueça de logar localmente: az login");
+            await Console.Error.WriteLineAsync(e.Message);
+            throw;
+        }
     }
 }

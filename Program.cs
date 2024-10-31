@@ -18,7 +18,7 @@ public class Program
 
         var connectionString = builder.Configuration["postgre:database"]!;
         var azurePostgreTokenScope = builder.Configuration["postgre:tokenScope"]!;
-        var postgreUserName = await PostgreUserService.GetPostgreSQLAuthUserName(builder.Configuration);
+        var postgreUserName = await PostgreUserService.GetPostgreSqlAuthUserName(builder.Configuration);
         var connectionStringBuilder = new NpgsqlConnectionStringBuilder(connectionString)
         {
             Username = postgreUserName
